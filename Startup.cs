@@ -1,4 +1,5 @@
 using Inventory_Management_System__Miracle_Shop_.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -45,6 +46,15 @@ namespace Inventory_Management_System__Miracle_Shop_
                 options.Password.RequireLowercase = false;
             });
 
+            // Ensure the cookie authentication is set up correctly
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+         .AddCookie(options =>
+         {
+             options.LoginPath = "/Authentication/Login"; // Path to your login page
+             options.LogoutPath = "/Authentication/Login"; // Path to your logout page
+             options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Cookie expiration time
+         });
+
 
         }
 
@@ -63,6 +73,8 @@ namespace Inventory_Management_System__Miracle_Shop_
 
             app.UseRouting();
 
+            app.UseAuthentication(); // Add this before app.UseAuthorization()
+            
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

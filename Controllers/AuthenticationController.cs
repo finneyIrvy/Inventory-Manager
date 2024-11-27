@@ -2,6 +2,7 @@
 using Inventory_Management_System__Miracle_Shop_.ViewModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 
 namespace Inventory_Management_System__Miracle_Shop_.Controllers
@@ -40,19 +41,17 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 City = model.City,
-                Gender = model.Gender
+                Gender = model.Gender,
+                LastLoginTime= DateTime.Now
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
-                // Sign in the user after successful registration
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToAction("Authentication", "Login");
+                return RedirectToAction("Login", "Authentication"); // Redirect to a relevant page
             }
-
-            // Log and display errors
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -90,10 +89,12 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
 
         // Logout
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
-            return RedirectToAction("Login", "Authentication");
+            await _signInManager.SignOutAsync(); // Clears authentication cookies
+            return RedirectToAction("Login", "Authentication"); // Redirect after logout
         }
+
     }
 }

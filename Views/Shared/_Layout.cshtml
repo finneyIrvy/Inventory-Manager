@@ -1,4 +1,12 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<NewUserClass> _usermanager
+@inject SignInManager<NewUserClass> signInManager
+
+@{
+    var isAuthenticated = signInManager.IsSignedIn(User); // Use SignInManager for better checking
+    var user = isAuthenticated ? await _usermanager.GetUserAsync(User) : null;
+}
+
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -9,15 +17,37 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Inventory_Management_System__Miracle_Shop_</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Miracle_Shop_</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                    <ul class="navbar-nav flex-grow-1">
+                    <ul class="navbar-nav me-auto">
+                        @if (!isAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Authentication" asp-action="SignUp">Register</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" href="javascript:void(0);">Welcome, @user.UserName</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <form asp-area="" asp-controller="Authentication" asp-action="Logout" method="post" class="d-inline">
+                                    <input type="hidden" name="__RequestVerificationToken" value="@Html.AntiForgeryToken()" />
+                                    <button type="submit" class="btn btn-link nav-link text-dark p-0" style="text-decoration: none;">Logout</button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav flex-grow-1 ms-auto">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
@@ -29,6 +59,7 @@
             </div>
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -40,6 +71,7 @@
             &copy; 2024 - Inventory_Management_System__Miracle_Shop_ - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
