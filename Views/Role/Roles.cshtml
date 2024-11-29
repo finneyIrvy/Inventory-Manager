@@ -1,0 +1,45 @@
+﻿@using Microsoft.AspNetCore.Identity
+
+@model IEnumerable<IdentityRole>
+
+@{
+    ViewData["Title"] = "All Roles";
+}
+
+<h5>@ViewData["Title"]</h5>
+
+<div class="container">
+    <div class="row justify-content-lg-start">
+        <div class="col-md-6 " style="padding: 20px; transform: scale(0.90); transform-origin: top center">
+
+ <a class="btn btn-success btn-sm mb-3" asp-area="" asp-controller="Role" asp-action="CreateRole">Create Role</a>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Role Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var role in Model)
+        {
+                        <tr>
+                            <td>@role.Name</td>
+                            <td>
+                                <a href="@Url.Action("EditRole", new { id = role.Id })" class="btn btn-warning btn-sm">Edit</a>
+                                <!-- Delete form without onclick -->
+                                <form method="post" action="@Url.Action("DeleteRoleConfirmed", new { id = role.Id })" style="display:inline;" id="delete-form">
+                                    <button type="button" class="btn btn-danger btn-sm" id="delete-button">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+
+        }
+    </tbody>
+</table>
+
+</div>
+</div>
+</div>
