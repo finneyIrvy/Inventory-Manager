@@ -52,7 +52,7 @@ namespace Inventory_Management_System__Miracle_Shop_
          {
              options.LoginPath = "/Authentication/Login"; // Path to your login page
              options.LogoutPath = "/Authentication/Login"; // Path to your logout page
-             options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Cookie expiration time
+             options.ExpireTimeSpan = TimeSpan.FromSeconds(50); // Cookie expiration time
          });
 
 

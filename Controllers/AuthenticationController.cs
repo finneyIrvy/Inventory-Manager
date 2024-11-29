@@ -10,11 +10,13 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
     public class AuthenticationController : Controller
     {
         private readonly UserManager<NewUserClass> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<NewUserClass> _signInManager;
 
-        public AuthenticationController(UserManager<NewUserClass> userManager, SignInManager<NewUserClass> signInManager)
+        public AuthenticationController(UserManager<NewUserClass> userManager, SignInManager<NewUserClass> signInManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
             _signInManager = signInManager;
         }
 

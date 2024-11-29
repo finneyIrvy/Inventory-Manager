@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Inventory_Management_System__Miracle_Shop_.Controllers
 {
-   
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

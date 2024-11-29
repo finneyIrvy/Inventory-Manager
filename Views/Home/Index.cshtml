@@ -1,8 +1,10 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<NewUserClass> _usermanager
+@inject SignInManager<NewUserClass> signInManager
+
+@{
+    var isAuthenticated = signInManager.IsSignedIn(User); // Use SignInManager for better checking
+    var user = isAuthenticated ? await _usermanager.GetUserAsync(User) : null;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+Welcome, @user.FirstName

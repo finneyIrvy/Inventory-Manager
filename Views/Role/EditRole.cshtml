@@ -1,0 +1,72 @@
+﻿@model Microsoft.AspNetCore.Identity.IdentityRole
+
+@{
+    ViewData["Title"] = "Edit Role";
+}
+
+
+
+@if (Model != null)
+{
+    <div class="container">
+
+        <h4>@ViewData["Title"]</h4>
+
+        <div class="row justify-content-lg-center">
+            <div class="col-md-6" style="padding: 20px; transform: scale(0.90); transform-origin: top center">
+
+                <form method="post">
+                    <div class="form-group">
+                        <label for="roleName">Role Name</label>
+                        <input type="text" class="form-control" id="roleName" name="roleName" value="@Model.Name" required />
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                        </div>
+
+                        <div class="col-4 mr-2">
+                            <a href="@Url.Action("Roles")" class="btn btn-secondary btn-sm">All-Roles</a>
+                        </div>
+                    </div>
+                    
+                </form>
+               
+            </div>
+        </div>
+
+    </div>
+}
+else
+{
+    <div class="container">
+        <div class="row justify-content-lg-center">
+            <div class="col-md-6" style="padding: 20px; transform: scale(0.90); transform-origin: top center">
+
+                <form method="post">
+                    <div class="form-group">
+                        <label for="roleName">Role Name</label>
+                        <input type="text" class="form-control text-success font-weight-bold badge-light" id="roleName" name="roleName" value="UPDATED" required />
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                        </div>
+
+                        <div class="col-4 mr-2">
+                            <a href="@Url.Action("Roles")" class="btn btn-secondary btn-sm">All-Roles</a>
+                        </div>
+                    </div>
+                </form>
+
+                @if (ViewBag.Message != null)
+                {
+                    <div class="alert alert-info mt-3">
+                        @ViewBag.Message
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+}

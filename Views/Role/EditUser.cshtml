@@ -1,0 +1,73 @@
+﻿@model NewUserClass
+
+@{
+    ViewData["Title"] = "Personal Profile";
+}
+
+<style>
+    #spinner {
+        margin-right: 10px; /* Add space between the spinner and the text */
+    }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 " style="padding: 20px; transform: scale(0.90); transform-origin: top center">
+    <h4>@ViewData["Title"]</h4>
+
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-info">
+            @ViewBag.Message
+        </div>
+    }
+
+            <form method="post" id="editForm">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" class="form-control" id="firstName" name="firstName" value="@Model.FirstName" required />
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" class="form-control" id="lastName" name="lastName" value="@Model.LastName" required />
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="@Model.Email" required />
+                </div>
+                <div class="form-group">
+                    <label for="userName">Username</label>
+                    <input type="text" class="form-control" id="userName" name="userName" value="@Model.UserName" required />
+                </div>
+                <div class="form-group">
+                    <label asp-for="Gender">Gender</label>
+                    <select asp-for="Gender" class="form-control" required>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-sm" id="submitButton">
+                    <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display:none;"></span>
+                    Update
+                </button>
+                <a href="@Url.Action("Users")" class="btn btn-secondary btn-sm">Cancel</a>
+            </form>
+
+            <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+
+            <script>
+                $(document).ready(function() {
+                    $('#editForm').submit(function(e) {
+                        // Show spinner and disable button
+                        $('#spinner').show();
+                        $('#submitButton').prop('disabled', true);
+                    });
+                });
+            </script>
+
+    </div>
+  </div>
+</div>

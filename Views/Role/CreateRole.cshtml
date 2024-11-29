@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Create Role";
+}
+
+
+
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 " style="padding: 20px; transform: scale(0.90); transform-origin: top center">
+
+            <h4>@ViewData["Title"]</h4>
+
+           <form method="post">
+              <div class="form-group">
+                  <label for="roleName">Role Name</label>
+                    <input type="text" class="form-control" id="roleName" name="roleName" required />
+              </div>
+
+                <div class="row">
+                    <div class="col-2">
+                        <button type="submit" class="btn btn-primary btn-sm">Create</button>
+                    </div>
+
+                    <div class="col-4 mr-2">
+                        <a href="@Url.Action("Roles")" class="btn btn-secondary btn-sm">All-Roles</a>
+                    </div>
+                </div>
+                
+            </form>
+
+
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-info mt-3">
+                    @ViewBag.Message
+                </div>
+            }
+
+       </div>
+    </div>
+</div>
+
