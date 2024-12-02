@@ -21,7 +21,7 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-2">
             <div class="container">
 
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" style="font-family: 'Raleway', sans-serif; color: #FF6F00;">
@@ -68,12 +68,16 @@
                             <li class="nav-item">
                                 <a class="nav-link" style="color: #5A5A5A;" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" style="color: #5A5A5A;" asp-area="" asp-controller="Role" asp-action="Roles">Roles</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" style="color: #5A5A5A;" asp-area="" asp-controller="Role" asp-action="Users">Users</a>
-                            </li>
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" style="color: #5A5A5A;" asp-area="" asp-controller="Role" asp-action="Roles">Roles</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" style="color: #5A5A5A;" asp-area="" asp-controller="Role" asp-action="Users">Users</a>
+                                </li>
+                            }
                         }
                     </ul>
 
@@ -89,9 +93,9 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-white " style="font-family: 'Raleway', sans-serif;background-color: #008080; border-color: #FFB07C; color: white;">
         <div class="container">
-            &copy; 2024 - Inventory_Management_System__Miracle_Shop_ - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2024 Smart Shop <a class="text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
 

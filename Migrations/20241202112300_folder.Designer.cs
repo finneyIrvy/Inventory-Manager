@@ -4,43 +4,22 @@ using Inventory_Management_System__Miracle_Shop_.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Inventory_Management_System__Miracle_Shop_.Migrations
 {
     [DbContext(typeof(MiracleDbContext))]
-    partial class MiracleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241202112300_folder")]
+    partial class folder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "3.1.32")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-            modelBuilder.Entity("Inventory_Management_System__Miracle_Shop_.Models.Folder", b =>
-                {
-                    b.Property<int>("FolderID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FolderName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("FolderID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("Folders");
-                });
 
             modelBuilder.Entity("Inventory_Management_System__Miracle_Shop_.Models.NewUserClass", b =>
                 {
@@ -137,9 +116,6 @@ namespace Inventory_Management_System__Miracle_Shop_.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("FolderID")
-                        .HasColumnType("int");
-
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
 
@@ -160,11 +136,9 @@ namespace Inventory_Management_System__Miracle_Shop_.Migrations
 
                     b.HasKey("ProductID");
 
-                    b.HasIndex("FolderID");
-
                     b.HasIndex("UserID");
 
-                    b.ToTable("Products");
+                    b.ToTable("Product");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -298,24 +272,11 @@ namespace Inventory_Management_System__Miracle_Shop_.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("Inventory_Management_System__Miracle_Shop_.Models.Folder", b =>
-                {
-                    b.HasOne("Inventory_Management_System__Miracle_Shop_.Models.NewUserClass", "User")
-                        .WithMany("Folders")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("Inventory_Management_System__Miracle_Shop_.Models.Product", b =>
                 {
-                    b.HasOne("Inventory_Management_System__Miracle_Shop_.Models.Folder", "Folder")
-                        .WithMany("Products")
-                        .HasForeignKey("FolderID");
-
                     b.HasOne("Inventory_Management_System__Miracle_Shop_.Models.NewUserClass", "User")
                         .WithMany("Products")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("UserID");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

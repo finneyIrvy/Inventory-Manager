@@ -8,6 +8,7 @@
     <div class="row justify-content-center">
         <div class="col-md-6 " style="padding: 20px; transform: scale(0.90); transform-origin: top center">
 
+            <h5 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Login</h5>
             <form asp-action="Login" method="post" onsubmit="return showSpinnerBeforeLogin(this)">
                 <div class="form-group">
                     <label asp-for="Email" class="form-label">Username</label>
@@ -33,7 +34,7 @@
                     </div>
                 }
 
-                <button type="submit" id="loginButton" class="btn w-100"
+                <button type="submit" id="loginButton" class="btn w-100 mt-3"
                         style="background-color: #FFB07C; border-color: #FFB07C; color: white; font-family: 'Raleway', sans-serif;">
                     <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     <span class="btn-text">Login</span>

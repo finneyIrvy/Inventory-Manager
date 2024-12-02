@@ -8,25 +8,23 @@
     <div class="row justify-content-lg-start">
         <div class="col-md-12" style="padding: 20px; transform: scale(0.90); transform-origin: top center">
 
-            <h5>Assign Role to Profiles</h5>
-
+            <h4 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Assign Role to Profiles</h4>
             @if (TempData["Message"] != null)
             {
-                <div class="alert alert-info col-md-4 col-lg-4">
+                <div class="alert alert-success alert-heading col-md-4 col-lg-4">
                     @TempData["Message"]
                 </div>
             }
-
-            <form method="post" action="@Url.Action("AssignRole", "Role")">
+            <form method="post" id="CreateroleForm"action="@Url.Action("AssignRole", "Role")">
                 @Html.AntiForgeryToken() <!-- CSRF Token -->
                 <!-- Select Role Section -->
                 <div class="form-group col-sm-12 col-lg-4">
                     <label for="roleName">Role</label>
-                    <select name="roleName" id="roleName" class="form-control" required>
+                    <select style=" color: #008080;" name="roleName" id="roleName" class="form-control" required>
                         <option value="">-- Select Role --</option>
                         @foreach (var role in ViewBag.Roles as List<string>)
                         {
-                            <option value="@role">@role</option>
+                            <option style=" color: #008080;" value="@role">@role</option>
                         }
                     </select>
                 </div>
@@ -37,12 +35,12 @@
 
                     @foreach (var user in Model)
                     {
-                        <div class="form-check">
+                        <div class="form-check" >
                             <!-- Updated name for checkbox binding -->
-                            <input type="checkbox" name="selectedUsers[]" value="@user.Id" class="form-check-input" id="user_@user.Id" />
+                            <input type="checkbox" name="selectedUsers[]" value="@user.Id" class="form-check-input" style="color: #FF6F00;" id="user_@user.Id" />
 
                             <label class="form-check-label" for="user_@user.Id">
-                                @user.UserName (@user.Email)
+                                @user.FirstName @user.LastName 
                             </label>
                         </div>
                     }
@@ -50,12 +48,27 @@
 
                 <!-- Submit Button -->
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-
+                    <button type="submit" class="btn btn-sm" style="font-family: 'Raleway', sans-serif;background-color: #008080; border-color: #FFB07C; color: white;" id="CreateroleForm">
+                            <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display:none;"></span>
+                            Submit
+                        </button>
                     <a href="@Url.Action("Users")" class="btn btn-secondary btn-sm">Cancel</a>
                 </div>
 
             </form>
+
+            <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+
+            <script>
+                $(document).ready(function() {
+                    $('#CreateroleForm').submit(function (e) {
+                        // Show spinner and disable button
+                        $('#spinner').show();
+                        $('#submitButton').prop('disabled', true);
+                    });
+                });
+            </script>
 
         </div>
     </div>

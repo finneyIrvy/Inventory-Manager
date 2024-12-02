@@ -1,18 +1,17 @@
 ﻿@model IEnumerable<NewUserClass>
 
-<div class="row justify-content-lg-around">
+<div class="row justify-content-lg-start">
     <div class="col-md-12" style="padding: 20px; transform: scale(0.90); transform-origin: top center">
-        <h5>System Profiles</h5>
-
-        <a class="btn btn-success btn-sm mb-3" asp-area="" asp-controller="Role" asp-action="RoleUser">Assign-Role</a>
+        <h5 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">System Profiles</h5>
 
         @if (TempData["Message"] != null)
         {
-            <div class="alert alert-info">
+            <div class="alert alert-success alert-dismissible">
                 @TempData["Message"]
             </div>
         }
 
+        <a class="btn btn-sm mb-3"  style="color: green; font-family: 'Raleway', sans-serif;" asp-area="" asp-controller="Role" asp-action="RoleUser">Assign-Role</a>
         <table class="table">
             <thead>
                 <tr>
@@ -20,7 +19,8 @@
                     <th>LastName</th>
                     <th>Email</th>
                     <th>Username</th>
-                    <td>Gender</td>
+                    <th>Gender</th>
+                    <th>Account Created</th>
                     <th>Roles</th> <!-- Added column for roles -->
                     <th>Actions</th>
                 </tr>
@@ -29,22 +29,24 @@
                 @foreach (var user in Model)
                 {
                     <tr>
-                        <td>@user.FirstName</td>
-                        <td>@user.LastName</td>
+                        <td style="color: #008080; font-family: 'Raleway', sans-serif;">@user.FirstName</td>
+                        <td style="color: #008080; font-family: 'Raleway', sans-serif;">@user.LastName</td>
                         <td>@user.Email</td>
-                        <td>@user.UserName</td>
-                        <td>@user.Gender</td>
+                        <td style ="font-family: 'Raleway', sans-serif; color: #FF6F00;">
+                            @user.UserName</td>
+                        <td>@user.Gender*</td>
+                        <td class="text-success">@user.LastLoginTime</td>
                         <td>
                             <!-- Display the roles for each user -->
                             @if (ViewBag.UserRoles != null && ViewBag.UserRoles.ContainsKey(user.Id))
                             {
                                 var roles = ViewBag.UserRoles[user.Id];
-                                <span>@string.Join(", ", roles)</span> <!-- Display roles as comma separated list -->
+                                <span>@string.Join("*", roles)</span> <!-- Display roles as comma separated list -->
                             }
                         </td>
                         <td>
                             <!-- Example Actions: Edit, Delete, Assign Role -->
-                            <a href="@Url.Action("EditUser", new { id = user.Id })" class="btn btn-primary btn-sm">Edit</a>
+                            <a href="@Url.Action("EditUser", new { id = user.Id })" class="btn btn-primary btn-sm" style="background-color: #FFB07C; border-color: #FFB07C; color: white; font-family: 'Raleway', sans-serif;">Edit</a>
 
                             <form method="post" action="@Url.Action("DeleteUser")" style="display:inline;">
                                 <input type="hidden" name="id" value="@user.Id" />

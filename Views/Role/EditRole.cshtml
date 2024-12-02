@@ -10,10 +10,10 @@
 {
     <div class="container">
 
-        <h4>@ViewData["Title"]</h4>
-
+       
         <div class="row justify-content-lg-center">
             <div class="col-md-6" style="padding: 20px; transform: scale(0.90); transform-origin: top center">
+                <h4 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">@ViewData["Title"]</h4>
 
                 <form method="post">
                     <div class="form-group">
@@ -22,7 +22,7 @@
                     </div>
                     <div class="row">
                         <div class="col-2">
-                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                            <button type="submit" class="btn btn-sm" style="font-family: 'Raleway', sans-serif;background-color: #008080; border-color: #FFB07C; color: white;">Update</button>
                         </div>
 
                         <div class="col-4 mr-2">
@@ -49,10 +49,7 @@ else
                         <input type="text" class="form-control text-success font-weight-bold badge-light" id="roleName" name="roleName" value="UPDATED" required />
                     </div>
                     <div class="row">
-                        <div class="col-2">
-                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
-                        </div>
-
+                       
                         <div class="col-4 mr-2">
                             <a href="@Url.Action("Roles")" class="btn btn-secondary btn-sm">All-Roles</a>
                         </div>
@@ -61,7 +58,7 @@ else
 
                 @if (ViewBag.Message != null)
                 {
-                    <div class="alert alert-info mt-3">
+                    <div class="alert alert-success alert-dismissible mt-3">
                         @ViewBag.Message
                     </div>
                 }

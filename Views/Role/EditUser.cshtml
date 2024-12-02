@@ -13,11 +13,11 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-6 " style="padding: 20px; transform: scale(0.90); transform-origin: top center">
-    <h4>@ViewData["Title"]</h4>
+            <h4 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">@ViewData["Title"]</h4>
 
     @if (ViewBag.Message != null)
     {
-        <div class="alert alert-info">
+        <div class="alert alert-success">
             @ViewBag.Message
         </div>
     }
@@ -39,16 +39,16 @@
                     <label for="userName">Username</label>
                     <input type="text" class="form-control" id="userName" name="userName" value="@Model.UserName" required />
                 </div>
-                <div class="form-group">
+                <div class="form-group " >
                     <label asp-for="Gender">Gender</label>
-                    <select asp-for="Gender" class="form-control" required>
-                        <option value="Male">Male</option>
+                    <select  asp-for="Gender" class="form-control" required>
+                        <option  value="Male">Male</option>
                         <option value="Female">Female</option>
                         <option value="Other">Other</option>
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-sm" id="submitButton">
+                <button type="submit" class="btn btn-sm" style="font-family: 'Raleway', sans-serif;background-color: #008080; border-color: #FFB07C; color: white;" id="submitButton">
                     <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display:none;"></span>
                     Update
                 </button>

@@ -4,14 +4,16 @@ using Inventory_Management_System__Miracle_Shop_.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Inventory_Management_System__Miracle_Shop_.Migrations
 {
     [DbContext(typeof(MiracleDbContext))]
-    partial class MiracleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241202113454_product ")]
+    partial class product
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,9 +28,6 @@ namespace Inventory_Management_System__Miracle_Shop_.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("FolderName")
                         .HasColumnType("nvarchar(max)");
 
@@ -39,7 +38,7 @@ namespace Inventory_Management_System__Miracle_Shop_.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Folders");
+                    b.ToTable("Folder");
                 });
 
             modelBuilder.Entity("Inventory_Management_System__Miracle_Shop_.Models.NewUserClass", b =>
@@ -164,7 +163,7 @@ namespace Inventory_Management_System__Miracle_Shop_.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Products");
+                    b.ToTable("Product");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -301,9 +300,8 @@ namespace Inventory_Management_System__Miracle_Shop_.Migrations
             modelBuilder.Entity("Inventory_Management_System__Miracle_Shop_.Models.Folder", b =>
                 {
                     b.HasOne("Inventory_Management_System__Miracle_Shop_.Models.NewUserClass", "User")
-                        .WithMany("Folders")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .WithMany()
+                        .HasForeignKey("UserID");
                 });
 
             modelBuilder.Entity("Inventory_Management_System__Miracle_Shop_.Models.Product", b =>
@@ -314,8 +312,7 @@ namespace Inventory_Management_System__Miracle_Shop_.Migrations
 
                     b.HasOne("Inventory_Management_System__Miracle_Shop_.Models.NewUserClass", "User")
                         .WithMany("Products")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("UserID");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -9,33 +9,45 @@
     <div class="row justify-content-center">
         <div class="col-md-6 " style="padding: 20px; transform: scale(0.90); transform-origin: top center">
 
-            <h4>@ViewData["Title"]</h4>
+            <h4 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">@ViewData["Title"]</h4>
 
-           <form method="post">
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-success alert-dismissible mt-3">
+                    @ViewBag.Message
+                </div>
+            }
+
+            <form method="post" id="CreateroleForm">
               <div class="form-group">
                   <label for="roleName">Role Name</label>
                     <input type="text" class="form-control" id="roleName" name="roleName" required />
               </div>
 
-                <div class="row">
-                    <div class="col-2">
-                        <button type="submit" class="btn btn-primary btn-sm">Create</button>
-                    </div>
+                <div class="form-group">
+                        <button type="submit" class="btn btn-sm" style="font-family: 'Raleway', sans-serif;background-color: #008080; border-color: #FFB07C; color: white;" id="CreateroleForm">
+                            <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display:none;"></span>
+                            Create
+                        </button>
 
-                    <div class="col-4 mr-2">
-                        <a href="@Url.Action("Roles")" class="btn btn-secondary btn-sm">All-Roles</a>
-                    </div>
+                        <a href="@Url.Action("Roles")" class="btn btn-secondary btn-sm  mr-2">All-Roles</a>
                 </div>
-                
+
             </form>
 
+            <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
-            @if (ViewBag.Message != null)
-            {
-                <div class="alert alert-info mt-3">
-                    @ViewBag.Message
-                </div>
-            }
+
+            <script>
+                $(document).ready(function() {
+                    $('#CreateroleForm').submit(function (e) {
+                        // Show spinner and disable button
+                        $('#spinner').show();
+                        $('#submitButton').prop('disabled', true);
+                    });
+                });
+            </script>
+           
 
        </div>
     </div>
