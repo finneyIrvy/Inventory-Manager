@@ -1,0 +1,30 @@
+﻿@model Folder
+
+<div class="container">
+    <div class="row justify-content-lg-start">
+        <div class="col-md-6" style="padding: 20px; transform: scale(0.90); transform-origin: top center">
+            <h5 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Edit Folder</h5>
+
+            <form asp-action="Edit" method="post" id="editFolderForm">
+                <div class="form-group">
+                    <label for="folderName">Folder Name</label>
+                    <input type="text" class="form-control" id="folderName" name="folderName" value="@Model.FolderName" required />
+                </div>
+                <button type="submit" class="btn btn-sm mt-3" style="font-family: 'Raleway', sans-serif; background-color: #008080; color: white;" id="submitBtn">
+                    Update
+                    <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true" style="display: none;" id="spinner"></span>
+                </button>
+                <a href="@Url.Action("Index")" class="btn btn-sm btn-secondary mt-3">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add this script to handle the loading state -->
+<script>
+    document.getElementById('editFolderForm').addEventListener('submit', function () {
+        // Show the spinner and disable the button
+        document.getElementById('spinner').style.display = 'inline-block'; // Show spinner
+        document.getElementById('submitBtn').disabled = true; // Disable the submit button
+    });
+</script>

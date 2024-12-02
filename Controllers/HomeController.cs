@@ -78,7 +78,82 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
             return RedirectToAction("Index"); // Redirect to the Index view
         }
 
+        // GET: Show the edit form for a specific folder
+        public async Task<IActionResult> Edit(int id)
+        {
+            // Retrieve the folder by ID from the database
+            var folder = await _context.Folders
+                                       .FirstOrDefaultAsync(f => f.FolderID == id);
 
+            // If the folder doesn't exist, return a NotFound result
+            if (folder == null)
+            {
+                return NotFound();
+            }
+
+            // Return the folder to the view for editing
+            return View(folder);
+        }
+
+
+        // POST: Save the changes to the folder
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, string folderName)
+        {
+            // Retrieve the folder by ID
+            var folder = await _context.Folders.FindAsync(id);
+
+            // If the folder doesn't exist, return a NotFound result
+            if (folder == null)
+            {
+                return NotFound();
+            }
+
+            // Check if the folder name is different
+            if (folder.FolderName != folderName)
+            {
+                folder.FolderName = folderName;
+                await _context.SaveChangesAsync();
+            }
+
+          
+            // Set a success message using TempData with the folder's name
+            TempData["Message"] = $"Folder '{folder.FolderName}' Edited successfully!";
+            TempData["MessageType"] = "success";
+
+
+            // Redirect back to the Index page after editing
+            return RedirectToAction("Index");
+        }
+
+       
+        // POST: Delete the folder
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            // Retrieve the folder by ID
+            var folder = await _context.Folders.FindAsync(id);
+
+            // If the folder doesn't exist, return a NotFound result
+            if (folder == null)
+            {
+                return NotFound();
+            }
+
+            // Delete the folder from the database
+            _context.Folders.Remove(folder);
+            await _context.SaveChangesAsync();
+
+            // Set a success message using TempData with the folder's name
+            TempData["Message"] = $"Folder '{folder.FolderName}' deleted successfully!";
+            TempData["MessageType"] = "success";
+
+
+            // Redirect back to the Index page after deletion
+            return RedirectToAction("Index");
+        }
 
 
 
