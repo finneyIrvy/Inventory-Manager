@@ -1,0 +1,56 @@
+﻿@model IEnumerable<Inventory_Management_System__Miracle_Shop_.Models.Product>
+
+<h5 class="mb-3" style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Products</h5>
+
+@if (Model.Any())
+{
+    <div class="row g-3 mb-4">
+        <!-- Added mb-4 to give space below the row -->
+        @foreach (var product in Model)
+        {
+            <div class="col-md-3">
+                <div class="card h-100 shadow-sm" style="border-radius: 10px; overflow: hidden; display: flex; flex-direction: column;">
+                    <!-- Card Image -->
+                    <div style="height: 200px; overflow: hidden;">
+                        @if (!string.IsNullOrEmpty(product.ImagePath))
+                        {
+                            <img src="@product.ImagePath" class="card-img-top" alt="@product.ProductName" style="width: 100%; height: 100%; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <img src="https://via.placeholder.com/200" class="card-img-top" alt="No Image Available" style="width: 100%; height: 100%; object-fit: cover;">
+                        }
+                    </div>
+
+                    <!-- Card Footer -->
+                    <div class="card-footer mt-auto">
+                        <h6 class="mb-1" style="font-weight: bold;">@product.ProductName</h6>
+                        <p class="text-muted small mb-1">
+                            @if (!string.IsNullOrEmpty(product.Description))
+                            {
+                                @product.Description
+                            }
+                            else
+                            {
+                                <em>No description available</em>
+                            }
+                        </p>
+                        <p class="text-muted small">
+                            <strong>Category:</strong> @product.Category<br />
+                            <strong>Location:</strong> @product.Location<br />
+                            <strong>Quantity:</strong> @product.Quantity<br />
+                            <strong>Cost:</strong> $@product.Cost
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="d-flex justify-content-center align-items-center" style="height: 60vh; border: 1px solid #ccc; border-radius: 10px; padding: 20px;">
+        <i class="fas fa-box-open" style="font-size: 8rem; color: #008080;"></i>
+    </div>
+
+}

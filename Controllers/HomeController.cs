@@ -9,6 +9,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace Inventory_Management_System__Miracle_Shop_.Controllers
 {
@@ -45,6 +47,23 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
             return View(folders);
         }
 
+
+        public async Task<IActionResult> Products()
+        {
+            // Get the current logged-in user's ID
+            var userId = _userManager.GetUserId(User);
+
+            // Retrieve the products associated with the logged-in user
+            var products = await _context.Products
+                                          .Where(p => p.UserID == userId) // Filter by user ID
+                                          .ToListAsync();
+
+            // Pass the list of products to the view
+            return View(products);
+        }
+
+
+
         [HttpPost]
         public async Task<IActionResult> CreateFolder(string folderName)
         {
@@ -57,7 +76,7 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
             if (existingFolder != null)
             {
                 // Folder already exists, set a denial message using TempData
-                TempData["Message"] = "A folder with this name already exists.";
+                TempData["Message"] = $"A folder with the name '{folderName}' already exists.";
                 TempData["MessageType"] = "error"; // Optional: to specify the message type (error, success)
                 return RedirectToAction("Index"); // Redirect to the Index view
             }
@@ -73,10 +92,171 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
             await _context.SaveChangesAsync();
 
             // Folder successfully created, set a success message using TempData
-            TempData["Message"] = "Folder successfully Added!";
+            TempData["Message"] = $"Folder '{folderName}' successfully added!";
             TempData["MessageType"] = "success"; // Optional: to specify the message type
             return RedirectToAction("Index"); // Redirect to the Index view
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ViewFolder(int folderId)
+        {
+            var folder = await _context.Folders
+                                       .Include(f => f.Products)
+                                       .FirstOrDefaultAsync(f => f.FolderID == folderId);
+
+            if (folder == null)
+            {
+                TempData["Message"] = "Folder not found.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Index");
+            }
+
+            return View(folder);
+        }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> AddProductToFolder(int folderId, Product product, IFormFile imageFile)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var folder = await _context.Folders
+                .FirstOrDefaultAsync(f => f.FolderID == folderId && f.UserID == userId);
+
+            if (folder == null)
+            {
+                TempData["Message"] = "Folder not found or you do not have access to this folder.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Index");
+            }
+
+            // Handle image file upload
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine("wwwroot", "uploads");
+                Directory.CreateDirectory(uploadsFolder);
+                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(imageFile.FileName)}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(fileStream);
+                }
+
+                product.ImagePath = $"/uploads/{uniqueFileName}"; // Save relative path in the database
+            }
+
+            product.FolderID = folderId;
+            product.UserID = userId;
+            if (product.DateAdded == default) product.DateAdded = DateTime.Now;
+
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = $"{product.ProductName} added to folder successfully!";
+            TempData["MessageType"] = "success";
+            return RedirectToAction("ViewFolder", new { folderId });
+        }
+
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> EditProduct(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                TempData["Message"] = "Product not found.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Index");
+            }
+
+            return View(product);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProduct(Product updatedProduct)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Message"] = "Please correct the errors.";
+                TempData["MessageType"] = "error";
+                return View(updatedProduct);
+            }
+
+            // Check if file is uploaded and handle it
+            var file = Request.Form.Files.FirstOrDefault();
+            if (file != null && file.Length > 0)
+            {
+                // Define file path
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", file.FileName);
+
+                // Save the file to the specified path
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                // Update the ImagePath property with the file path
+                updatedProduct.ImagePath = "/images/" + file.FileName;
+            }
+            else if (string.IsNullOrEmpty(updatedProduct.ImagePath))
+            {
+                // Ensure that ImagePath is not left empty if no file is uploaded
+                TempData["Message"] = "Please upload a product image.";
+                TempData["MessageType"] = "error";
+                return View(updatedProduct);
+            }
+
+            // Find the product to update
+            var product = await _context.Products.FindAsync(updatedProduct.ProductID);
+            if (product == null)
+            {
+                TempData["Message"] = "Product not found.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Index");
+            }
+
+            // Update the product details
+            product.ProductName = updatedProduct.ProductName;
+            product.Category = updatedProduct.Category;
+            product.Description = updatedProduct.Description;
+            product.Location = updatedProduct.Location;
+            product.ImagePath = updatedProduct.ImagePath; // Updated image path
+
+            // Save changes to the database
+              await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Product updated successfully.";
+            TempData["MessageType"] = "success";
+            return RedirectToAction("ViewFolder", new { folderId = product.FolderID });
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                TempData["Message"] = "Product not found.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Index");
+            }
+
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Product deleted successfully.";
+            TempData["MessageType"] = "success";
+            return RedirectToAction("ViewFolder", new { folderId = product.FolderID });
+        }
+
 
         // GET: Show the edit form for a specific folder
         public async Task<IActionResult> Edit(int id)
@@ -155,12 +335,6 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
             return RedirectToAction("Index");
         }
 
-
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

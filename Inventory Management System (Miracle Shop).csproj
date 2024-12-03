@@ -8,6 +8,8 @@
   <ItemGroup>
     <Compile Remove="Migrations\20241126144238_initial.cs" />
     <Compile Remove="Migrations\20241126144238_initial.Designer.cs" />
+    <Compile Remove="Migrations\20241203110721_time.cs" />
+    <Compile Remove="Migrations\20241203110721_time.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +24,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.32" />
     <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\NewFolder\" />
   </ItemGroup>
 
 </Project>

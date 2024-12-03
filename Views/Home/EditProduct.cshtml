@@ -1,0 +1,105 @@
+﻿@model Inventory_Management_System__Miracle_Shop_.Models.Product
+
+<div class="container">
+    <div class="row justify-content-lg-center">
+        <div class="col-md-6" style="padding: 20px; transform: scale(0.90); transform-origin: top center">
+            <h5 class=" mb-3" style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Product Profile</h5>
+
+            @if (TempData["Message"] != null)
+            {
+                <div id="tempMessage" class="alert alert-@TempData["MessageType"] col-md-4" role="alert">
+                    @TempData["Message"]
+                </div>
+
+                <script>
+                    setTimeout(function () {
+                        document.getElementById('tempMessage').style.display = 'none';
+                    }, 5000);
+                </script>
+            }
+
+            <form asp-action="EditProduct" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="ProductID" />
+
+                <!-- Product Name -->
+                <div class="form-group">
+                    <label asp-for="ProductName"></label>
+                    <input asp-for="ProductName" class="form-control" />
+                    <span asp-validation-for="ProductName" class="text-danger"></span>
+                </div>
+
+                <!-- Category -->
+                <div class="form-group">
+                    <label asp-for="Category"></label>
+                    <input asp-for="Category" class="form-control" />
+                    <span asp-validation-for="Category" class="text-danger"></span>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label asp-for="Description"></label>
+                    <textarea asp-for="Description" class="form-control"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <!-- Image Path (File Upload) -->
+                <div class="form-group">
+                    <label asp-for="ImagePath" class="form-label">Product Image</label>
+                    <input asp-for="ImagePath" type="file" class="form-control" name="ImagePath" id="ImagePath" />
+                    <span asp-validation-for="ImagePath" class="text-danger"></span>
+                </div>
+
+                <!-- Location -->
+                <div class="form-group">
+                    <label asp-for="Location"></label>
+                    <input asp-for="Location" class="form-control" />
+                    <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+
+                <!-- Type -->
+                <div class="form-group">
+                    <label asp-for="Type"></label>
+                    <input asp-for="Type" class="form-control" />
+                    <span asp-validation-for="Type" class="text-danger"></span>
+                </div>
+
+                <!-- Quantity -->
+                <div class="form-group">
+                    <label asp-for="Quantity"></label>
+                    <input asp-for="Quantity" class="form-control" />
+                    <span asp-validation-for="Quantity" class="text-danger"></span>
+                </div>
+
+                <!-- Cost -->
+                <div class="form-group">
+                    <label asp-for="Cost"></label>
+                    <input asp-for="Cost" class="form-control" />
+                    <span asp-validation-for="Cost" class="text-danger"></span>
+                </div>
+
+                <!-- Date Added -->
+                <div class="form-group">
+                    <label asp-for="DateAdded"></label>
+                    <input asp-for="DateAdded" class="form-control" />
+                    <span asp-validation-for="DateAdded" class="text-danger"></span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-sm mt-3" style="font-family: 'Raleway', sans-serif; background-color: #008080; color: white;">
+                    Update
+                </button>
+
+                <!-- Cancel Button -->
+                <a href="@Url.Action("ViewFolder", "Home")" class="btn btn-sm btn-secondary mt-3">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Validation Scripts -->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

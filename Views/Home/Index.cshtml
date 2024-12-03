@@ -86,9 +86,9 @@ else
         <tbody>
             @foreach (var folder in Model)
             {
-                <tr >
+                <tr>
                     <td>
-                        <a href="@Url.Action("Privacy", "Home", new { id = folder.FolderID })" style="text-decoration:none">
+                        <a href="@Url.Action("ViewFolder", "Home", new { folderId = folder.FolderID })" style="text-decoration:none">
                             @folder.FolderName
                         </a>
                     </td>
@@ -97,14 +97,11 @@ else
                     </td>
                     <td>
                         <a href="@Url.Action("Edit", "Home", new { id = folder.FolderID })" class="btn btn-sm" style="background-color: #FFB07C; border-color: #FFB07C; color: white; font-family: 'Raleway', sans-serif;">Edit</a>
-
                         <form method="post" action="@Url.Action("Delete", "Home", new { id = folder.FolderID })" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this folder?')">
-                            @Html.AntiForgeryToken()  <!-- Add CSRF token for security -->
+                            @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                         </form>
-
                     </td>
-
                 </tr>
             }
         </tbody>
@@ -112,8 +109,13 @@ else
 }
 else
 {
-    <p>No Folders</p>
+    <div class="d-flex justify-content-center align-items-center" style="height: 60vh; border: 1px solid #ccc; border-radius: 10px; padding: 20px;">
+
+        <i class="fas fa-folder-plus" style="font-size: 8rem; color: #008080;"></i>
+        
+    </div>
 }
+
 
 
 <!-- Scripts for Modal (Bootstrap 5) -->
