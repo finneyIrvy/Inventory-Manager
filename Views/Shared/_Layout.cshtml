@@ -63,12 +63,18 @@
                     <ul class="navbar-nav flex-grow-1 ms-auto">
                         @if (isAuthenticated)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link" style="color: #5A5A5A;" asp-area="" asp-controller="Home" asp-action="Index">Folders</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" style="color: #5A5A5A;" asp-area="" asp-controller="Home" asp-action="Products">Products</a>
-                            </li> 
+                            <ul class="navbar-nav">
+                                <li class="nav-item">
+                                    <a class="nav-link" style="color: #5A5A5A;" asp-area="" asp-controller="Home" asp-action="Index">Folders</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" style="color: #5A5A5A;" asp-area="" asp-controller="Home" asp-action="Products">Products</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" style="color: #5A5A5A;" asp-area="" asp-controller="Home" asp-action="StockMovements">Stock Movements</a>
+                                </li>
+                            </ul>
+
 
                             @if (User.IsInRole("Admin"))
                             {
@@ -100,16 +106,10 @@
         </div>
     </footer>
 
-
-    
-    
+    @RenderSection("Scripts", required: false)
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    @RenderSection("Scripts", required: false)
-
-    
-   
 </body>
 </html>

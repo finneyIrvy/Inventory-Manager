@@ -57,5 +57,12 @@ namespace Inventory_Management_System__Miracle_Shop_.Models
         // Date when the product was added
         [Required(ErrorMessage = "Please enter the date of addition.")]
         public DateTime DateAdded { get; set; } = DateTime.Now; // Default to current date
+
+        // New Property for Stock Threshold
+        public int MinStockLevel { get; set; } = 5; // Default to 5
+
+        // Not Mapped Property to Hold Alert Status
+        [NotMapped]
+        public string StockStatus => Quantity <= MinStockLevel ? "Low" : "OK";
     }
 }

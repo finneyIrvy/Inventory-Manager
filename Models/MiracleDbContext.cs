@@ -13,6 +13,7 @@ namespace Inventory_Management_System__Miracle_Shop_.Models
         // DbSet for Products
         public DbSet<Product> Products { get; set; }
 
+        public DbSet<StockMovement> StockMovement { get; set; }
         // DbSet for Folders
         public DbSet<Folder> Folders { get; set; }
 

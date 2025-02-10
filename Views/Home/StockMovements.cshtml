@@ -1,0 +1,27 @@
+﻿
+
+<h5 class=" mb-3" style="font-family: 'Raleway', sans-serif; color: #FF6F00;">StockMovements</h5>
+
+<table class="table table-bordered mt-3">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Quantity</th>
+            <th>From</th>
+            <th>To</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var movement in Model)
+        {
+            <tr>
+                <td>@movement.MovementDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@movement.MovementType</td>
+                <td>@movement.QuantityChanged</td>
+                <td>@movement.SourceLocation</td>
+                <td>@movement.DestinationLocation</td>
+            </tr>
+        }
+    </tbody>
+</table>

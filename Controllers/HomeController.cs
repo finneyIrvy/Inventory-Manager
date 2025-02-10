@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using iTextSharp.text.pdf;
+using iTextSharp.text;
+using Inventory_Management_System__Miracle_Shop_.ViewModel;
 
 namespace Inventory_Management_System__Miracle_Shop_.Controllers
 {
@@ -48,18 +51,114 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
         }
 
 
-        public async Task<IActionResult> Products()
+        public async Task<IActionResult> Products(string searchTerm)
         {
             // Get the current logged-in user's ID
             var userId = _userManager.GetUserId(User);
 
             // Retrieve the products associated with the logged-in user
-            var products = await _context.Products
-                                          .Where(p => p.UserID == userId) // Filter by user ID
-                                          .ToListAsync();
+            var productsQuery = _context.Products.Where(p => p.UserID == userId);
 
-            // Pass the list of products to the view
+            // Apply search filter if a search term is provided
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                productsQuery = productsQuery.Where(p => p.ProductName.Contains(searchTerm) ||
+                                                         p.Category.Contains(searchTerm) ||
+                                                         p.Description.Contains(searchTerm) ||
+                                                         p.Location.Contains(searchTerm));
+            }
+
+            var products = await productsQuery.ToListAsync();
+
+            // Count low stock products
+            int lowStockCount = products.Count(p => p.Quantity <= p.MinStockLevel);
+
+            // Pass alert count and products to the view
+            ViewBag.LowStockCount = lowStockCount;
             return View(products);
+        }
+
+
+        public async Task<IActionResult> MoveProduct(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.ProductID == id && p.UserID == userId);
+
+            if (product == null)
+            {
+                TempData["Message"] = "Product not found or you do not have access to this product.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Index");
+            }
+
+            var folders = await _context.Folders
+                .Where(f => f.UserID == userId)
+                .ToListAsync();
+
+            var viewModel = new MoveProductViewModel
+            {
+                Product = product,
+                Folders = folders
+            };
+
+            // Check if the request is an AJAX request
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_MoveProductPartial", viewModel);
+            }
+
+            return View(viewModel);
+        }
+
+
+
+        // POST: Handle the move product form submission
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MoveProduct(int id, int destinationFolderId)
+        {
+            var userId = _userManager.GetUserId(User);
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.ProductID == id && p.UserID == userId);
+
+            if (product == null)
+            {
+                TempData["Message"] = "Product not found or you do not have access to this product.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Index");
+            }
+
+            var destinationFolder = await _context.Folders
+                .FirstOrDefaultAsync(f => f.FolderID == destinationFolderId && f.UserID == userId);
+
+            if (destinationFolder == null)
+            {
+                TempData["Message"] = "Destination folder not found or you do not have access to this folder.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Index");
+            }
+
+            var previousFolderId = product.FolderID;
+            product.FolderID = destinationFolderId;
+
+            // Log the stock movement
+            var stockMovement = new StockMovement
+            {
+                ProductID = product.ProductID,
+                MovementType = "Moved",
+                QuantityChanged = 0, // Quantity remains the same
+                SourceLocation = previousFolderId.ToString(),
+                DestinationLocation = destinationFolderId.ToString(),
+                MovementDate = DateTime.Now
+            };
+
+            _context.StockMovement.Add(stockMovement);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = $"{product.ProductName} moved to {destinationFolder.FolderName} successfully!";
+            TempData["MessageType"] = "success";
+            return RedirectToAction("ViewFolder", new { folderId = destinationFolderId });
         }
 
 
@@ -114,6 +213,74 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
             return View(folder);
         }
 
+        public IActionResult ExportToPDF(int folderId)
+        {
+            var products = _context.Products.Where(p => p.FolderID == folderId).ToList();
+
+            if (!products.Any())
+            {
+                return Content("No products found in the selected folder.");
+            }
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                Document document = new Document(PageSize.A4);
+                PdfWriter.GetInstance(document, ms);
+                document.Open();
+
+                // Title
+                Font titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 14);
+                Paragraph title = new Paragraph("Product List - Folder " + folderId, titleFont);
+                title.Alignment = Element.ALIGN_CENTER;
+                title.SpacingAfter = 10f;
+                document.Add(title);
+
+                // Create Table
+                PdfPTable table = new PdfPTable(5); // 5 columns
+                table.WidthPercentage = 100;
+                table.SetWidths(new float[] { 3f, 2f, 2f, 1.5f, 2f });
+
+                // Table Headers
+                Font headerFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 12);
+                string[] headers = { "Product Name", "Category", "Location", "Quantity", "Cost" };
+                foreach (string header in headers)
+                {
+                    PdfPCell cell = new PdfPCell(new Phrase(header, headerFont))
+                    {
+                        BackgroundColor = new BaseColor(211, 211, 211),
+                        HorizontalAlignment = Element.ALIGN_CENTER,
+                        Padding = 5
+                    };
+                    table.AddCell(cell);
+                }
+
+                // Table Data
+                Font cellFont = FontFactory.GetFont(FontFactory.HELVETICA, 10);
+                foreach (var product in products)
+                {
+                    table.AddCell(new PdfPCell(new Phrase(product.ProductName, cellFont)));
+                    table.AddCell(new PdfPCell(new Phrase(product.Category, cellFont)));
+                    table.AddCell(new PdfPCell(new Phrase(product.Location, cellFont)));
+                    table.AddCell(new PdfPCell(new Phrase(product.Quantity.ToString(), cellFont)));
+                    table.AddCell(new PdfPCell(new Phrase("$" + product.Cost.ToString("F2"), cellFont)));
+                }
+
+                document.Add(table);
+                document.Close();
+
+                return File(ms.ToArray(), "application/pdf", $"Products_Folder_{folderId}.pdf");
+            }
+        }
+
+        public async Task<IActionResult> StockMovements()
+        {
+            var movements = await _context.StockMovement
+                                          .Include(m => m.Product) // Ensure Product details are included
+                                          .OrderByDescending(m => m.MovementDate)
+                                          .ToListAsync();
+
+            return View(movements);
+        }
 
 
         [HttpPost]

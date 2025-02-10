@@ -4,14 +4,16 @@ using Inventory_Management_System__Miracle_Shop_.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Inventory_Management_System__Miracle_Shop_.Migrations
 {
     [DbContext(typeof(MiracleDbContext))]
-    partial class MiracleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250209180751_fin]")]
+    partial class fin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -178,38 +180,6 @@ namespace Inventory_Management_System__Miracle_Shop_.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Inventory_Management_System__Miracle_Shop_.Models.StockMovement", b =>
-                {
-                    b.Property<int>("StockMovementID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("DestinationLocation")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("MovementDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("MovementType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ProductID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QuantityChanged")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SourceLocation")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("StockMovementID");
-
-                    b.HasIndex("ProductID");
-
-                    b.ToTable("StockMovement");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -359,15 +329,6 @@ namespace Inventory_Management_System__Miracle_Shop_.Migrations
                         .WithMany("Products")
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Inventory_Management_System__Miracle_Shop_.Models.StockMovement", b =>
-                {
-                    b.HasOne("Inventory_Management_System__Miracle_Shop_.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

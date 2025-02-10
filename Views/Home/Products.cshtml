@@ -1,6 +1,24 @@
 ﻿@model IEnumerable<Inventory_Management_System__Miracle_Shop_.Models.Product>
 
-<h5 class="mb-3" style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Products</h5>
+<!-- First Row: Add Product Button & Search Bar -->
+<div class="d-flex justify-content-between align-items-center mb-2">
+   
+    <!-- Second Row: Products Title (Aligned Left) -->
+    <div class="mb-3">
+        <h5 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Products</h5>
+    </div>
+
+    <!-- Search Bar (Right) -->
+    <form method="get" action="@Url.Action("Products", "Home")" class="d-flex">
+        <input type="text" name="searchTerm" class="form-control me-2" placeholder="Search products..."
+               value="@Context.Request.Query["searchTerm"]">
+        <button type="submit" class="btn" style="font-family: 'Raleway', sans-serif; background-color: #008080; color: white;">
+            <i class="fas fa-search"></i>
+        </button>
+    </form>
+</div>
+
+
 
 @if (Model.Any())
 {
@@ -24,7 +42,7 @@
 
                     <!-- Card Footer -->
                     <div class="card-footer mt-auto">
-                        <h6 class="mb-1" style="font-weight: bold;">@product.ProductName</h6>
+                        <h6 class="mb-1" style="font-weight: bold;font-family: 'Raleway', sans-serif; color: #FF6F00;">@product.ProductName</h6>
                         <p class="text-muted small mb-1">
                             @if (!string.IsNullOrEmpty(product.Description))
                             {
@@ -54,3 +72,4 @@ else
     </div>
 
 }
+

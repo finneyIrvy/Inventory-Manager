@@ -8,10 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MiracleDbContext = Inventory_Management_System__Miracle_Shop_.Models.MiracleDbContext;
 
 namespace Inventory_Management_System__Miracle_Shop_
 {
@@ -28,11 +24,13 @@ namespace Inventory_Management_System__Miracle_Shop_
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            
-            // Register DbContext
-            services.AddDbContext<MiracleDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("MiracleshopDbConnection")));
-            
+
+            // Register DbContext with updated connection string name
+
+            var con = Configuration.GetConnectionString("MiracleShop");
+
+            services.AddDbContextPool<MiracleDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("MiracleShop")));
+
             services.AddIdentity<NewUserClass, IdentityRole>()
                 .AddEntityFrameworkStores<MiracleDbContext>()
                 .AddDefaultTokenProviders();
@@ -48,14 +46,12 @@ namespace Inventory_Management_System__Miracle_Shop_
 
             // Ensure the cookie authentication is set up correctly
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-         .AddCookie(options =>
-         {
-             options.LoginPath = "/Authentication/Login"; // Path to your login page
-             options.LogoutPath = "/Authentication/Login"; // Path to your logout page
-             options.ExpireTimeSpan = TimeSpan.FromSeconds(50); // Cookie expiration time
-         });
-
-
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Authentication/Login"; // Path to your login page
+                    options.LogoutPath = "/Authentication/Login"; // Path to your logout page
+                    options.ExpireTimeSpan = TimeSpan.FromSeconds(50); // Cookie expiration time
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -74,7 +70,7 @@ namespace Inventory_Management_System__Miracle_Shop_
             app.UseRouting();
 
             app.UseAuthentication(); // Add this before app.UseAuthorization()
-            
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
