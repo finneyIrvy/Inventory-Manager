@@ -14,21 +14,63 @@
     }
 }
 
-
-
-@if (user != null)
-{
-    <p>Welcome, @user.FirstName</p>
+@{
+    string[] colors = {
+        "#F8F9FA", "#E3F2FD", "#E0F2F1", "#F5F5DC", "#FAFAFA", // Light Neutrals
+        "#DFF0D8", "#D1E8E2", "#C8E6C9", "#B2EBF2", "#B3E5FC", // Soft Greens & Blues
+        "#FFF3CD", "#FFECB3", "#FFD54F", "#FFCC80", "#FFB74D", // Warm Yellows & Oranges
+        "#F8BBD0", "#E1BEE7", "#D1C4E9", "#BBDEFB", "#B2DFDB", // Soft Pinks & Purples
+        "#A5D6A7", "#81C784", "#4DB6AC", "#64B5F6", "#90CAF9", // Additional Blues & Greens
+        "#FFAB91", "#FF8A65", "#F48FB1", "#CE93D8", "#B39DDB"  // Additional Warm Colors
+    };
+    int colorIndex = 0;
 }
-else
-{
-    <p>Welcome, guest!</p>
-}
 
-<!-- Add Folder Button -->
-<a href="javascript:void(0);" class="btn btn-sm mb-3" style="font-family: 'Raleway', sans-serif; background-color: #008080; color: white;" data-bs-toggle="modal" data-bs-target="#addFolderModal">
-    <i class="fa fa-folder-plus" aria-hidden="true"></i> Add-Folder
-</a>
+
+
+<style>
+    .folder-card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+        .folder-card:hover {
+            transform: translateY(-5px); /* Slight lift */
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2); /* Add shadow */
+        }
+
+    .scrollable-row {
+        max-height:500px; /* Adjust height as needed */
+        overflow-y: auto; /* Enable vertical scrolling */
+        color: #FF6F00;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center">
+    <h5 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Folders</h5>
+
+    <form method="get" asp-action="Index" class="d-flex">
+        <input type="text" name="searchTerm" class="form-control me-2" placeholder="Search folders..." value="@Context.Request.Query["searchTerm"]" />
+        <button type="submit" class="btn" style="font-family: 'Raleway', sans-serif; background-color: #008080; color: white;">
+            <i class="fas fa-search"></i>
+        </button>
+    </form>
+</div>
+
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+
+    <!-- View Toggle Buttons -->
+    <div class="mb-3">
+        <button onclick="switchView('card')" class="btn btn-sm " style="font-family: 'Raleway', sans-serif; color: #FF6F00;"><i class="fas fa-th-large"></i> Card View</button>
+        <button onclick="switchView('list')" class="btn btn-sm" style="font-family: 'Raleway', sans-serif; color: #008080;"><i class="fas fa-list"></i> List View</button>
+    </div>
+
+    <!-- Search Bar (Right) -->
+    <a href="javascript:void(0);" class="btn btn-sm" style="font-family: 'Raleway', sans-serif; background-color: #008080; color: white;" data-bs-toggle="modal" data-bs-target="#addFolderModal">
+        <i class="fa fa-folder-plus" aria-hidden="true"></i> Add-Folder
+    </a>
+</div>
+
 
 <!-- Modal -->
 <div class="modal fade" id="addFolderModal" tabindex="-1" aria-labelledby="addFolderModalLabel" aria-hidden="true">
@@ -71,48 +113,104 @@ else
     </script>
 }
 
-<h5 class=" mb-3"  style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Folders</h5>
-
 @if (Model.Any())
 {
-    <table class="table mt-2">
-        <thead>
-            <tr>
-                <th>Folder Name</th>
-                <th>Date Created</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
+    <style>
+        .scrollable-row {
+            max-height: 400px; /* Adjust height as needed */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+    </style>
+
+    <div class="container py-4" style="background-color: #F0F0F0; min-height: 60vh; border-radius: 10px;">
+        <!-- Card View (Default) -->
+        <div id="cardView" class="row scrollable-row">
             @foreach (var folder in Model)
             {
-                <tr>
-                    <td>
-                        <a href="@Url.Action("ViewFolder", "Home", new { folderId = folder.FolderID })" style="text-decoration:none">
-                            @folder.FolderName
-                        </a>
-                    </td>
-                    <td style="font-size:x-small">
-                        @folder.CreatedAt
-                    </td>
-                    <td>
-                        <a href="@Url.Action("Edit", "Home", new { id = folder.FolderID })" class="btn btn-sm" style="background-color: #FFB07C; border-color: #FFB07C; color: white; font-family: 'Raleway', sans-serif;">Edit</a>
-                        <form method="post" action="@Url.Action("Delete", "Home", new { id = folder.FolderID })" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this folder?')">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                        </form>
-                    </td>
-                </tr>
+                string cardColor = colors[colorIndex % colors.Length]; // Assign a color from the list
+                colorIndex++;
+
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                    <div class="card shadow-sm mb-4 border-0 folder-card p-2" style="border-radius: 6px; font-size: 12px; background-color: @cardColor; height: 100px;">
+                        <div class="card-body p-1 text-center d-flex flex-column justify-content-between">
+                            <h6 class="text-truncate">
+                                <a href="@Url.Action("ViewFolder", "Home", new { folderId = folder.FolderID })" class="text-decoration-none" style="color: #FF6F00;">
+                                    <i class="fas fa-folder-open text-warning"></i> @folder.FolderName
+                                </a>
+                            </h6>
+                            <p class="text-muted small mb-1">
+                                <i class="fas fa-calendar-alt"></i> @folder.CreatedAt
+                            </p>
+                            <div class="d-flex justify-content-end">
+                                <!-- Edit Icon -->
+                                <a href="@Url.Action("Edit", "Home", new { id = folder.FolderID })" class="text-warning me-2">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <!-- Delete Icon -->
+                                <form method="post" action="@Url.Action("Delete", "Home", new { id = folder.FolderID })" onsubmit="return confirm('Are you sure you want to delete this folder?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="border-0 bg-transparent text-danger p-0">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+
+        <!-- List View (Initially Hidden) -->
+        <div id="listView" class="d-none">
+            <ul class="list-group">
+                @{
+                    int index = 1;
+                }
+                @foreach (var folder in Model)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center flex-column flex-md-row">
+                        <div class="d-flex flex-column col-6">
+                            <span>
+                                <strong>@index.</strong>
+                                <i class="fas fa-folder-open text-warning"></i>
+                                <a href="@Url.Action("ViewFolder", "Home", new { folderId = folder.FolderID })" class="text-decoration-none" style="font-family: 'Raleway', sans-serif; color: #008080;">
+                                    @folder.FolderName
+                                </a>
+                            </span>
+                            <span class="text-muted small mt-1">
+                                <i class="fas fa-calendar-alt"></i> @folder.CreatedAt
+                            </span>
+                        </div>
+
+                        <div class="d-flex justify-content-end col-6">
+                            <!-- Edit Icon -->
+                            <a href="@Url.Action("Edit", "Home", new { id = folder.FolderID })" class="text-warning me-2">
+                                <i class="fas fa-edit"></i>
+                            </a>
+
+                            <!-- Delete Icon -->
+                            <form method="post" action="@Url.Action("Delete", "Home", new { id = folder.FolderID })" onsubmit="return confirm('Are you sure you want to delete this folder?')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="border-0 bg-transparent text-danger p-0">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                    index++;
+                }
+            </ul>
+        </div>
+    </div>
+
+    
 }
 else
 {
-    <div class="d-flex justify-content-center align-items-center" style="height: 60vh; border: 1px solid #ccc; border-radius: 10px; padding: 20px;">
-
+    <div class="d-flex flex-column justify-content-center align-items-center" style="height: 60vh; border: 1px solid #ccc; border-radius: 10px; padding: 20px;">
         <i class="fas fa-folder-plus" style="font-size: 8rem; color: #008080;"></i>
-        
+        <p class="mt-3 " style="font-family: 'Raleway', sans-serif; color: #FF6F00;"> Click 'Add Folder' to get started.</p>
     </div>
 }
 
@@ -120,6 +218,18 @@ else
 
 <!-- Scripts for Modal (Bootstrap 5) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function switchView(view) {
+        if (view === 'card') {
+            document.getElementById('cardView').classList.remove('d-none');
+            document.getElementById('listView').classList.add('d-none');
+        } else {
+            document.getElementById('cardView').classList.add('d-none');
+            document.getElementById('listView').classList.remove('d-none');
+        }
+    }
+</script>
 
 <!-- JavaScript for Handling Spinner -->
 <script>

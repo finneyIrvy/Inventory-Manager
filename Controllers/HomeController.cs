@@ -14,6 +14,10 @@ using System.IO;
 using iTextSharp.text.pdf;
 using iTextSharp.text;
 using Inventory_Management_System__Miracle_Shop_.ViewModel;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Inventory_Management_System__Miracle_Shop_.Views.Home;
 
 namespace Inventory_Management_System__Miracle_Shop_.Controllers
 {
@@ -24,9 +28,13 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
         private readonly UserManager<NewUserClass> _userManager;
         private readonly SignInManager<NewUserClass> _signInManager;
         private readonly MiracleDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
+
+
 
         // Constructor with dependency injection
         public HomeController(ILogger<HomeController> logger,
+                              IHubContext<NotificationHub> hubContext,
                               UserManager<NewUserClass> userManager,
                               SignInManager<NewUserClass> signInManager,
                               MiracleDbContext context)
@@ -35,22 +43,80 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
             _context = context;
+            _hubContext = hubContext;
+
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchTerm)
         {
-            // Get the currently logged-in user's ID
             var userId = _userManager.GetUserId(User);
 
-            // Retrieve all folders associated with the user asynchronously
-            var folders = await _context.Folders
-                                        .Where(f => f.UserID == userId)
-                                        .ToListAsync();  // Use ToListAsync for async query
+            var foldersQuery = _context.Folders
+                                       .Where(f => f.UserID == userId);
 
-            // Pass the list of folders to the view
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                foldersQuery = foldersQuery.Where(f => f.FolderName.Contains(searchTerm));
+            }
+
+            var folders = await foldersQuery.ToListAsync();
+
             return View(folders);
         }
 
 
+
+        [HttpGet("notifications")]
+        public async Task<IActionResult> NotificationView()
+        {
+            var notifications = await _context.Notifications
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+
+            return View("NotificationView", notifications);
+        }
+
+        [HttpPost("add-notification")]
+        public async Task<IActionResult> AddNotification([FromBody] NotificationDto notificationDto)
+        {
+            var notification = new Notification
+            {
+                Message = notificationDto.Message,
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false,
+                Type = notificationDto.Type, // "LowStock" or "Movement"
+                UserId = notificationDto.UserId
+            };
+
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+
+            // Send real-time notification using SignalR
+            await _hubContext.Clients.All.SendAsync("ReceiveNotification", notification.Message);
+
+            return Ok(notification);
+        }
+
+
+        public override void OnActionExecuting(ActionExecutingContext context)
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                var userId = _userManager.GetUserId(User);
+
+                // Fetch low stock count
+                int lowStockCount = _context.Products
+                    .Where(p => p.UserID == userId && p.Quantity <= p.MinStockLevel)
+                    .Count();
+
+                ViewBag.LowStockCount = lowStockCount;
+            }
+
+            base.OnActionExecuting(context);
+        }
+
+
+
+        [HttpGet]
         public async Task<IActionResult> Products(string searchTerm)
         {
             // Get the current logged-in user's ID
@@ -70,52 +136,47 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
 
             var products = await productsQuery.ToListAsync();
 
-            // Count low stock products
-            int lowStockCount = products.Count(p => p.Quantity <= p.MinStockLevel);
+            // Filter low stock products
+            var lowStockProducts = products.Where(p => p.Quantity <= p.MinStockLevel).ToList();
 
-            // Pass alert count and products to the view
-            ViewBag.LowStockCount = lowStockCount;
+            // Save low stock notifications
+            if (lowStockProducts.Any())
+            {
+                foreach (var product in lowStockProducts)
+                {
+                    // Check if a notification for this product already exists
+                    var existingNotification = await _context.Notifications
+                        .FirstOrDefaultAsync(n => n.Message.Contains(product.ProductName) && n.Type == "LowStock");
+
+                    if (existingNotification == null) // Avoid duplicate notifications
+                    {
+                        var notification = new Notification
+                        {
+                            Message = $"Low stock alert: {product.ProductName} has only {product.Quantity} left!",
+                            Type = "LowStock",
+                            IsRead = false,
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        _context.Notifications.Add(notification);
+                        await _context.SaveChangesAsync();
+
+                        // Send notification via SignalR
+                        await _hubContext.Clients.All.SendAsync("ReceiveNotification", notification.Message);
+                    }
+                }
+            }
+
+            // Store low stock count in ViewBag
+            ViewBag.LowStockCount = lowStockProducts.Count;
+
             return View(products);
         }
 
 
-        public async Task<IActionResult> MoveProduct(int id)
-        {
-            var userId = _userManager.GetUserId(User);
-            var product = await _context.Products
-                .FirstOrDefaultAsync(p => p.ProductID == id && p.UserID == userId);
-
-            if (product == null)
-            {
-                TempData["Message"] = "Product not found or you do not have access to this product.";
-                TempData["MessageType"] = "error";
-                return RedirectToAction("Index");
-            }
-
-            var folders = await _context.Folders
-                .Where(f => f.UserID == userId)
-                .ToListAsync();
-
-            var viewModel = new MoveProductViewModel
-            {
-                Product = product,
-                Folders = folders
-            };
-
-            // Check if the request is an AJAX request
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return PartialView("_MoveProductPartial", viewModel);
-            }
-
-            return View(viewModel);
-        }
-
 
 
         // POST: Handle the move product form submission
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> MoveProduct(int id, int destinationFolderId)
         {
             var userId = _userManager.GetUserId(User);
@@ -147,19 +208,36 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
             {
                 ProductID = product.ProductID,
                 MovementType = "Moved",
-                QuantityChanged = 0, // Quantity remains the same
+                QuantityChanged = 0,
                 SourceLocation = previousFolderId.ToString(),
                 DestinationLocation = destinationFolderId.ToString(),
                 MovementDate = DateTime.Now
             };
 
             _context.StockMovement.Add(stockMovement);
+
+            // Save notification in the database
+            var notificationMessage = $"{product.ProductName} moved from Folder {previousFolderId} to {destinationFolder.FolderName}.";
+
+            var notification = new Notification
+            {
+                Message = notificationMessage,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Notifications.Add(notification);
             await _context.SaveChangesAsync();
+
+            // Send notification using SignalR
+            Console.WriteLine("Sending SignalR Notification: " + notificationMessage);
+            await _hubContext.Clients.All.SendAsync("ReceiveNotification", notificationMessage);
 
             TempData["Message"] = $"{product.ProductName} moved to {destinationFolder.FolderName} successfully!";
             TempData["MessageType"] = "success";
+
             return RedirectToAction("ViewFolder", new { folderId = destinationFolderId });
         }
+
 
 
 
@@ -197,21 +275,59 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
         }
 
         [HttpGet]
+        [HttpGet]
+        [HttpGet]
         public async Task<IActionResult> ViewFolder(int folderId)
         {
-            var folder = await _context.Folders
-                                       .Include(f => f.Products)
-                                       .FirstOrDefaultAsync(f => f.FolderID == folderId);
+            if (folderId <= 0)
+            {
+                TempData["Message"] = "Invalid folder ID.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Index");
+            }
 
-            if (folder == null)
+            // Check if user is authenticated
+            if (!_signInManager.IsSignedIn(User))
+            {
+                TempData["Message"] = "You need to log in first.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Get the currently logged-in user
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                TempData["Message"] = "User not found.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Fetch only folders belonging to the logged-in user
+            var userFolders = await _context.Folders
+                                            .Where(f => f.UserID == user.Id) // Filter by Identity User ID
+                                            .Include(f => f.Products)
+                                            .ToListAsync();
+
+            var selectedFolder = userFolders.FirstOrDefault(f => f.FolderID == folderId);
+
+            if (selectedFolder == null)
             {
                 TempData["Message"] = "Folder not found.";
                 TempData["MessageType"] = "error";
                 return RedirectToAction("Index");
             }
 
-            return View(folder);
+            ViewBag.Folder = selectedFolder.FolderName;
+            ViewBag.Products = selectedFolder.Products?.ToList() ?? new List<Product>();
+            ViewBag.AllFolders = userFolders; // Pass only the logged-in user's folders
+
+            return View(selectedFolder);
         }
+
+
+
+
 
         public IActionResult ExportToPDF(int folderId)
         {
@@ -219,8 +335,11 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
 
             if (!products.Any())
             {
-                return Content("No products found in the selected folder.");
+                TempData["Message"] = "No products found in the selected folder.";
+                TempData["MessageType"] = "warning"; // Optional: Set a type for styling
+                return RedirectToAction("ViewFolder", new { folderId });
             }
+
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -320,6 +439,33 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
 
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
+
+            // ✅ Check stock levels and trigger notification
+            if (product.Quantity <= product.MinStockLevel)
+            {
+                string statusMessage = $"⚠️ Low stock alert: {product.ProductName} has only {product.Quantity} left!";
+
+                // Check if a similar notification already exists
+                var existingNotification = await _context.Notifications
+                    .FirstOrDefaultAsync(n => n.Message.Contains(product.ProductName) && n.Type == "LowStock");
+
+                if (existingNotification == null)
+                {
+                    var notification = new Notification
+                    {
+                        Message = statusMessage,
+                        Type = "LowStock",
+                        IsRead = false,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    _context.Notifications.Add(notification);
+                    await _context.SaveChangesAsync();
+
+                    // 🔔 Send SignalR notification
+                    await _hubContext.Clients.All.SendAsync("ReceiveNotification", statusMessage);
+                }
+            }
 
             TempData["Message"] = $"{product.ProductName} added to folder successfully!";
             TempData["MessageType"] = "success";

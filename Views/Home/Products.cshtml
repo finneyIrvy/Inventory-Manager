@@ -1,17 +1,22 @@
 ﻿@model IEnumerable<Inventory_Management_System__Miracle_Shop_.Models.Product>
 
+<!-- Products Title (Aligned Left) -->
+<div class="mb-3">
+    <h5 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Products</h5>
+</div>
+
 <!-- First Row: Add Product Button & Search Bar -->
 <div class="d-flex justify-content-between align-items-center mb-2">
-   
-    <!-- Second Row: Products Title (Aligned Left) -->
+ 
+    <!-- View Toggle Buttons -->
     <div class="mb-3">
-        <h5 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Products</h5>
+        <button id="cardViewBtn" class="btn btn-sm " style="font-family: 'Raleway', sans-serif; color: #FF6F00;"><i class="fas fa-th-large"></i> Card View</button>
+        <button id="listViewBtn" class="btn btn-sm" style="font-family: 'Raleway', sans-serif; color: #008080;"><i class="fas fa-list"></i> List View</button>
     </div>
 
     <!-- Search Bar (Right) -->
     <form method="get" action="@Url.Action("Products", "Home")" class="d-flex">
-        <input type="text" name="searchTerm" class="form-control me-2" placeholder="Search products..."
-               value="@Context.Request.Query["searchTerm"]">
+        <input type="text" name="searchTerm" class="form-control me-2" placeholder="Search products..." value="@Context.Request.Query["searchTerm"]">
         <button type="submit" class="btn" style="font-family: 'Raleway', sans-serif; background-color: #008080; color: white;">
             <i class="fas fa-search"></i>
         </button>
@@ -22,41 +27,41 @@
 
 @if (Model.Any())
 {
-    <div class="row g-3 mb-4">
-        <!-- Added mb-4 to give space below the row -->
+    <!-- Card View (Default) -->
+    <div id="cardView" class="row g-3 mb-4">
         @foreach (var product in Model)
         {
-            <div class="col-md-3">
-                <div class="card h-100 shadow-sm" style="border-radius: 10px; overflow: hidden; display: flex; flex-direction: column;">
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2 p-1">
+                <div class="card h-100 shadow-sm" style="border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
                     <!-- Card Image -->
-                    <div style="height: 200px; overflow: hidden;">
+                    <div style="height: 120px; overflow: hidden;">
                         @if (!string.IsNullOrEmpty(product.ImagePath))
                         {
                             <img src="@product.ImagePath" class="card-img-top" alt="@product.ProductName" style="width: 100%; height: 100%; object-fit: cover;">
                         }
                         else
                         {
-                            <img src="https://via.placeholder.com/200" class="card-img-top" alt="No Image Available" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="https://via.placeholder.com/120" class="card-img-top" alt="No Image Available" style="width: 100%; height: 100%; object-fit: cover;">
                         }
                     </div>
 
                     <!-- Card Footer -->
-                    <div class="card-footer mt-auto">
-                        <h6 class="mb-1" style="font-weight: bold;font-family: 'Raleway', sans-serif; color: #FF6F00;">@product.ProductName</h6>
-                        <p class="text-muted small mb-1">
+                    <div class="card-footer mt-auto p-2 text-center">
+                        <h6 class="mb-1 text-truncate" style="font-size: 12px; font-weight: bold; font-family: 'Raleway', sans-serif; color: #FF6F00;">@product.ProductName</h6>
+                        <p class="text-muted small mb-1 text-truncate" style="font-size: 10px;">
                             @if (!string.IsNullOrEmpty(product.Description))
                             {
                                 @product.Description
                             }
                             else
                             {
-                                <em>No description available</em>
+                                <em>No description</em>
                             }
                         </p>
-                        <p class="text-muted small">
-                            <strong>Category:</strong> @product.Category<br />
-                            <strong>Location:</strong> @product.Location<br />
-                            <strong>Quantity:</strong> @product.Quantity<br />
+                        <p class="text-muted small mb-0" style="font-size: 10px;">
+                            <strong>Category:</strong> @product.Category <br />
+                            <strong>Location:</strong> @product.Location <br />
+                            <strong>Qty:</strong> @product.Quantity <br />
                             <strong>Cost:</strong> $@product.Cost
                         </p>
                     </div>
@@ -64,12 +69,52 @@
             </div>
         }
     </div>
+
+    <!-- Scrollable List View Container -->
+    <div class="container py-4" style="background-color: #F0F0F0; max-height: 60vh; overflow-y: auto; border-radius: 10px; padding-right: 10px;">
+        <!-- List View (Initially Hidden) -->
+        <div id="listView" class="table-responsive" style="display: none;">
+            <ul class="list-group">
+                @{
+                    int index = 1;
+                }
+                @foreach (var product in Model)
+                {
+                    <div class="list-item d-flex flex-column flex-md-row align-items-md-center justify-content-between p-3 mb-2 rounded shadow-sm bg-white">
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold" style="color: #FF6F00;">@index. @product.ProductName</span>
+                            <span class="text-muted small"><i class="fas fa-tags"></i> @product.Category</span>
+                        </div>
+
+                        <div class="text-muted small"><i class="fas fa-map-marker-alt"></i> @product.Location</div>
+                        <div class="fw-bold"><i class="fas fa-box"></i> @product.Quantity</div>
+                        <div class="fw-bold text-success">$@product.Cost</div>
+                    </div>
+                    index++;
+                }
+            </ul>
+        </div>
+    </div>
+
+
 }
 else
 {
-    <div class="d-flex justify-content-center align-items-center" style="height: 60vh; border: 1px solid #ccc; border-radius: 10px; padding: 20px;">
+    <div class="d-flex flex-column justify-content-center align-items-center" style="height: 60vh; border: 1px solid #ccc; border-radius: 10px; padding: 20px;">
         <i class="fas fa-box-open" style="font-size: 8rem; color: #008080;"></i>
+        <p class="mt-3 " style="font-family: 'Raleway', sans-serif; color: #FF6F00;">No Product Available</p>
     </div>
-
 }
 
+<!-- JavaScript for Toggle Functionality -->
+<script>
+    document.getElementById("cardViewBtn").addEventListener("click", function () {
+        document.getElementById("cardView").style.display = "flex";
+        document.getElementById("listView").style.display = "none";
+    });
+
+    document.getElementById("listViewBtn").addEventListener("click", function () {
+        document.getElementById("cardView").style.display = "none";
+        document.getElementById("listView").style.display = "block";
+    });
+</script>
