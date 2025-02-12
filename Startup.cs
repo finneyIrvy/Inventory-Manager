@@ -54,6 +54,8 @@ namespace Inventory_Management_System__Miracle_Shop_
                 });
 
             services.AddSignalR();
+
+            services.AddSession();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -70,6 +72,8 @@ namespace Inventory_Management_System__Miracle_Shop_
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseSession();
 
             app.UseAuthentication(); // Add this before app.UseAuthorization()
 

@@ -6,7 +6,7 @@
 
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-6 " style="padding: 20px; transform: scale(0.90); transform-origin: top center">
+        <div class="col-md-6" style="max-width: 500px; max-height:auto; margin: 0 auto; padding: 20px; transform: scale(0.85); transform-origin: top center;">
 
             <h5 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Login</h5>
             <form asp-action="Login" method="post" onsubmit="return showSpinnerBeforeLogin(this)">
@@ -58,10 +58,38 @@
                 }
             </script>
 
-            <p class="mt-3 text-center">
+            <p class="mt-5 text-center">
                 Don't have an account? <a asp-action="SignUp">Sign Up</a>
             </p>
+
+            <div class="text-center">
+                <h5 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Or Sign Up With"</h5>
+            </div>
+
+            <div class="row text-center mt-3">
+    
+                <div class="col-4">
+                    <a href="#" class="btn  w-100 d-flex align-items-center justify-content-center"
+                       style="height: 45px; border-radius: 10px;color: #008080;">
+                        <i class="fab fa-google"></i>
+                    </a>
+                </div>
+                <div class="col-4">
+                    <a href="#" class="btn  w-100 d-flex align-items-center justify-content-center"
+                       style="height: 45px; border-radius: 10px;color: #008080;">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                </div>
+                <div class="col-4">
+                    <a href="#" class="btn  w-100 d-flex align-items-center justify-content-center"
+                       style="height: 45px; border-radius: 10px;color: #008080;">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+
         </div>
+
     </div>
 </div>
 

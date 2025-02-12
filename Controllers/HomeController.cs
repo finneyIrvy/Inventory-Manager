@@ -13,11 +13,14 @@ using Microsoft.AspNetCore.Http;
 using System.IO;
 using iTextSharp.text.pdf;
 using iTextSharp.text;
-using Inventory_Management_System__Miracle_Shop_.ViewModel;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Inventory_Management_System__Miracle_Shop_.Views.Home;
+using CsvHelper;
+using ExcelDataReader;
+using System.Globalization;
+using System.Data;
+
 
 namespace Inventory_Management_System__Miracle_Shop_.Controllers
 {
@@ -63,7 +66,15 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
             return View(folders);
         }
 
+        [HttpGet]
+        public IActionResult Purchase(int id)
+        {
+            // Process the purchase logic
+            return View();
+        }
 
+
+       
 
         [HttpGet("notifications")]
         public async Task<IActionResult> NotificationView()
@@ -274,8 +285,7 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
             return RedirectToAction("Index"); // Redirect to the Index view
         }
 
-        [HttpGet]
-        [HttpGet]
+      
         [HttpGet]
         public async Task<IActionResult> ViewFolder(int folderId)
         {
@@ -286,7 +296,6 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Check if user is authenticated
             if (!_signInManager.IsSignedIn(User))
             {
                 TempData["Message"] = "You need to log in first.";
@@ -294,7 +303,6 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Get the currently logged-in user
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
@@ -303,9 +311,8 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Fetch only folders belonging to the logged-in user
             var userFolders = await _context.Folders
-                                            .Where(f => f.UserID == user.Id) // Filter by Identity User ID
+                                            .Where(f => f.UserID == user.Id)
                                             .Include(f => f.Products)
                                             .ToListAsync();
 
@@ -320,11 +327,102 @@ namespace Inventory_Management_System__Miracle_Shop_.Controllers
 
             ViewBag.Folder = selectedFolder.FolderName;
             ViewBag.Products = selectedFolder.Products?.ToList() ?? new List<Product>();
-            ViewBag.AllFolders = userFolders; // Pass only the logged-in user's folders
+            ViewBag.AllFolders = userFolders;
+            ViewBag.FolderID = folderId; // ✅ Pass the correct folder ID to the view
 
             return View(selectedFolder);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> ImportFromExcel(IFormFile file, int folderId)
+        {
+            if (file == null || file.Length == 0)
+            {
+                TempData["Message"] = "No file uploaded or file is empty.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("ViewFolder", new { folderId });
+            }
+
+            // Get logged-in user
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                TempData["Message"] = "User not found.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Check if the folder belongs to the user
+            var folder = await _context.Folders
+                .FirstOrDefaultAsync(f => f.FolderID == folderId && f.UserID == user.Id);
+
+            if (folder == null)
+            {
+                TempData["Message"] = "Invalid folder selection.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                using (var stream = new MemoryStream())
+                {
+                    await file.CopyToAsync(stream);
+                    stream.Position = 0;
+
+                    System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+                    using (var reader = ExcelReaderFactory.CreateReader(stream))
+                    {
+                        var result = reader.AsDataSet(new ExcelDataSetConfiguration
+                        {
+                            ConfigureDataTable = (_) => new ExcelDataTableConfiguration
+                            {
+                                UseHeaderRow = true // Ensure the first row is treated as column headers
+                            }
+                        });
+
+                        var dataTable = result.Tables[0];
+                        var products = new List<Product>();
+
+                        foreach (DataRow row in dataTable.Rows)
+                        {
+                            products.Add(new Product
+                            {
+                                ProductName = row["ProductName"].ToString(),
+                                Category = row["Category"].ToString(),
+                                Location = row["Location"].ToString(),
+                                Type = row["Type"].ToString(),
+                                Description = row["Description"].ToString(),
+                                Quantity = int.TryParse(row["Quantity"].ToString(), out int qty) ? qty : 0,
+                                Cost = decimal.TryParse(row["Cost"].ToString(), out decimal cost) ? cost : 0,
+                                UserID = user.Id,  // Auto-assign logged-in user
+                                FolderID = folderId // Auto-assign selected folder
+                            });
+                        }
+
+                        if (products.Any())
+                        {
+                            _context.Products.AddRange(products);
+                            await _context.SaveChangesAsync();
+                            TempData["Message"] = "Products imported successfully!";
+                            TempData["MessageType"] = "success";
+                        }
+                        else
+                        {
+                            TempData["Message"] = "No valid products found in the file.";
+                            TempData["MessageType"] = "warning";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Message"] = "Error processing the file: " + ex.Message;
+                TempData["MessageType"] = "error";
+            }
+
+            return RedirectToAction("ViewFolder", new { folderId });
+        }
 
 
 

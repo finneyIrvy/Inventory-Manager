@@ -13,13 +13,16 @@
 
     /* Notification Hover Effect */
     .notification-item {
-        transition: background-color 0.3s ease, color 0.3s ease;
+        position: relative; /* Ensures proper shadow rendering */
+        transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
     }
 
         .notification-item:hover {
-            background-color: #FF6F00 !important;
+            
             color: white !important;
+            box-shadow: 0 0 5px 2px #FF6F00; /* Creates an outer border effect */
         }
+
 
             .notification-item:hover i {
                 color: white !important;

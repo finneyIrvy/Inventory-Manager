@@ -4,14 +4,16 @@ using Inventory_Management_System__Miracle_Shop_.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Inventory_Management_System__Miracle_Shop_.Migrations
 {
     [DbContext(typeof(MiracleDbContext))]
-    partial class MiracleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250212063416_barcode")]
+    partial class barcode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

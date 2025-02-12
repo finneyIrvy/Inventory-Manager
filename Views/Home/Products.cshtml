@@ -1,17 +1,53 @@
 ﻿@model IEnumerable<Inventory_Management_System__Miracle_Shop_.Models.Product>
 
+<!-- CSS for Skeleton Loading Effect -->
+<style>
+    .skeleton-card {
+        background: #f2f2f2;
+        border-radius: 8px;
+        padding: 10px;
+        overflow: hidden;
+    }
+
+    .skeleton {
+        background: linear-gradient(90deg, #e0e0e0 25%, #f5f5f5 50%, #e0e0e0 75%);
+        background-size: 400% 100%; /* Increase size for smoother effect */
+        animation: loading 2.0s infinite linear;
+        border-radius: 4px;
+    }
+
+        .skeleton::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            transform: translateX(-100%);
+        }
+
+    .skeleton-img {
+        width: 100%;
+        height: 120px;
+    }
+
+    .skeleton-text {
+        margin: 5px auto;
+    }
+
+</style>
+
+
+
 <!-- Products Title (Aligned Left) -->
-<div class="mb-3">
-    <h5 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Products</h5>
-</div>
+
 
 <!-- First Row: Add Product Button & Search Bar -->
 <div class="d-flex justify-content-between align-items-center mb-2">
- 
-    <!-- View Toggle Buttons -->
+
     <div class="mb-3">
-        <button id="cardViewBtn" class="btn btn-sm " style="font-family: 'Raleway', sans-serif; color: #FF6F00;"><i class="fas fa-th-large"></i> Card View</button>
-        <button id="listViewBtn" class="btn btn-sm" style="font-family: 'Raleway', sans-serif; color: #008080;"><i class="fas fa-list"></i> List View</button>
+        <h5 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Products</h5>
     </div>
 
     <!-- Search Bar (Right) -->
@@ -23,17 +59,55 @@
     </form>
 </div>
 
+<!-- First Row: Add Product Button & Search Bar -->
+<div class="d-flex justify-content-between align-items-center mb-2">
+ 
+    <!-- View Toggle Buttons -->
+    <div class="mb-3">
+        <button id="cardViewBtn" class="btn btn-sm " style="font-family: 'Raleway', sans-serif; color: #FF6F00;"><i class="fas fa-th-large"></i> Card View</button>
+        <button id="listViewBtn" class="btn btn-sm" style="font-family: 'Raleway', sans-serif; color: #008080;"><i class="fas fa-list"></i> List View</button>
+    </div>
+
+    <!-- cat icon (Right) -->
+    <div>
+        <a href="/cart/view" class="position-relative" style="font-size: 18px; color: #FF6F00;">
+            <i class="fas fa-shopping-cart"></i>
+            <span id="cartCount" class="position-absolute bottom-0 start-100 translate-middle badge rounded-pill"
+                  style="font-size: 13px; color: #008080; display: none;">
+                0
+            </span>
+        </a>
+    </div>
+
+</div>
+
 
 
 @if (Model.Any())
 {
-    <!-- Card View (Default) -->
-    <div id="cardView" class="row g-3 mb-4">
+    <!-- Skeleton Loader (Initially Visible) -->
+    <div id="skeletonView" class="row g-3 mb-4">
+        @for (int i = 0; i < 12; i++) // Display 8 skeletons
+        {
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2 p-1">
+                <div class="card h-100 shadow-sm skeleton-card">
+                    <div class="skeleton skeleton-img"></div>
+                    <div class="card-footer mt-auto p-2 text-center">
+                        <div class="skeleton skeleton-text" style="width: 80%; height: 10px;"></div>
+                        <div class="skeleton skeleton-text" style="width: 60%; height: 8px;"></div>
+                        <div class="skeleton skeleton-text" style="width: 100%; height: 6px;"></div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Product Cards (Initially Hidden) -->
+    <div id="cardView" class="row g-3 mb-4" style="display: none;">
         @foreach (var product in Model)
         {
             <div class="col-6 col-sm-4 col-md-3 col-lg-2 p-1">
-                <div class="card h-100 shadow-sm" style="border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
-                    <!-- Card Image -->
+                <div class="card h-100 shadow-sm">
                     <div style="height: 120px; overflow: hidden;">
                         @if (!string.IsNullOrEmpty(product.ImagePath))
                         {
@@ -44,10 +118,8 @@
                             <img src="https://via.placeholder.com/120" class="card-img-top" alt="No Image Available" style="width: 100%; height: 100%; object-fit: cover;">
                         }
                     </div>
-
-                    <!-- Card Footer -->
                     <div class="card-footer mt-auto p-2 text-center">
-                        <h6 class="mb-1 text-truncate" style="font-size: 12px; font-weight: bold; font-family: 'Raleway', sans-serif; color: #FF6F00;">@product.ProductName</h6>
+                        <h6 class="mb-1 text-truncate" style="font-size: 12px; font-weight: bold;#008080; color: white;">@product.ProductName</h6>
                         <p class="text-muted small mb-1 text-truncate" style="font-size: 10px;">
                             @if (!string.IsNullOrEmpty(product.Description))
                             {
@@ -64,6 +136,15 @@
                             <strong>Qty:</strong> @product.Quantity <br />
                             <strong>Cost:</strong> $@product.Cost
                         </p>
+
+                        <button type="submit" class="btn btn-sm mt-2 add-to-cart"
+                                data-id="@product.ProductID"
+                                data-name="@product.ProductName"
+                                data-price="@product.Cost">
+                            <i class="fas fa-shopping-cart" style="color: #FF6F00;"></i> Add to Cart
+                        </button>
+
+
                     </div>
                 </div>
             </div>
@@ -106,6 +187,71 @@ else
     </div>
 }
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Load cart count when page loads
+        updateCartCount();
+
+        document.body.addEventListener('click', function (event) {
+            if (event.target.closest('.add-to-cart')) {
+                let button = event.target.closest('.add-to-cart');
+
+                let productId = button.getAttribute('data-id');
+                let productName = button.getAttribute('data-name');
+                let price = button.getAttribute('data-price');
+
+                if (!productId) {
+                    console.error("Error: Product ID is null or undefined.");
+                    alert("Error: Invalid product. Try again.");
+                    return;
+                }
+
+                let cartItem = {
+                    productId: parseInt(productId),  // Ensure it's a number
+                    productName: productName,
+                    price: parseFloat(price),
+                    quantity: 1
+                };
+
+                console.log("Sending to API:", cartItem);
+
+                fetch('/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(cartItem)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateCartCount(); // Update count after adding
+                        alert('Product added to cart!');
+                    } else {
+                        alert('Error adding product to cart.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        });
+    });
+
+    function updateCartCount() {
+        fetch('/cart/count')  // API endpoint to get the cart count
+            .then(response => response.json())
+            .then(data => {
+                let cartCount = document.getElementById('cartCount');
+                if (cartCount) {
+                    cartCount.textContent = data.count;
+                    cartCount.style.display = data.count > 0 ? 'inline-block' : 'none';
+                }
+            })
+            .catch(error => console.error('Error fetching cart count:', error));
+    }
+</script>
+
+
+
 <!-- JavaScript for Toggle Functionality -->
 <script>
     document.getElementById("cardViewBtn").addEventListener("click", function () {
@@ -118,3 +264,14 @@ else
         document.getElementById("listView").style.display = "block";
     });
 </script>
+
+ <!-- JavaScript to Handle Skeleton Loading -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            setTimeout(function () {
+                document.getElementById("skeletonView").style.display = "none";
+                document.getElementById("cardView").style.display = "flex";
+            }, 1000); // Adjust delay as needed
+        });
+    </script>
+

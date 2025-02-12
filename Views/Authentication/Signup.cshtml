@@ -8,7 +8,6 @@
     <div class="row justify-content-center">
         <div class="col-md-6" style="max-width: 500px; max-height:auto; margin: 0 auto; padding: 20px; transform: scale(0.85); transform-origin: top center;">
 
-           
             <h5 style="font-family: 'Raleway', sans-serif; color: #FF6F00;">Sign Up</h5>
             <form asp-action="SignUp" method="post" onsubmit="return showSpinnerBeforeSignUp(this)">
                 <div class="form-group">
@@ -25,7 +24,7 @@
 
                 <div class="form-group">
                     <label asp-for="Email" class="form-label"></label>
-                    <input asp-for="Email" class="form-control" placeholder="Eg signup@gmail.com"/>
+                    <input asp-for="Email" class="form-control" placeholder="Eg signup@gmail.com" />
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
 
@@ -41,30 +40,13 @@
                     <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                 </div>
 
-               @*  <div class="form-group overflow-hidden">
-                    <label asp-for="City" class="form-label">City(Optional)</label>
-                    <input asp-for="City" class="form-control" />
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="Gender" class="form-label">Gender(Optional)</label>
-                    <select asp-for="Gender" class="form-control">
-                        <option value="">Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div> *@
-
-                <!-- Sign Up Button with Peach Color -->
+                <!-- Sign Up Button -->
                 <button type="submit" id="signUpButton" class="btn w-100"
                         style="background-color: #FFB07C; border-color: #FFB07C; color: white; font-family: 'Raleway', sans-serif;">
                     <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     <span class="btn-text">Sign Up</span>
                 </button>
-@*  
-                <div asp-validation-summary="All" class="text-danger"></div> 
- *@            </form>
+            </form>
 
             <script>
                 function showSpinnerBeforeSignUp(form) {
@@ -72,12 +54,10 @@
                     const spinner = button.querySelector(".spinner-border");
                     const buttonText = button.querySelector(".btn-text");
 
-                    // Disable button and show spinner
                     button.disabled = true;
                     spinner.classList.remove("d-none");
                     buttonText.textContent = "Signing up...";
 
-                    // Allow form submission
                     return true;
                 }
             </script>
@@ -85,6 +65,29 @@
             <p class="mt-3 text-center">
                 Already have an account? <a asp-action="Login">Login</a>
             </p>
+
+            <!-- Social Login Buttons -->
+            <div class="row text-center mt-3">
+                <div class="col-4">
+                    <a href="#" class="btn  w-100 d-flex align-items-center justify-content-center"
+                       style="height: 45px; border-radius: 10px;color: #008080;">
+                        <i class="fab fa-google"></i>
+                    </a>
+                </div>
+                <div class="col-4">
+                    <a href="#" class="btn  w-100 d-flex align-items-center justify-content-center"
+                       style="height: 45px; border-radius: 10px;color: #008080;">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                </div>
+                <div class="col-4">
+                    <a href="#" class="btn  w-100 d-flex align-items-center justify-content-center"
+                       style="height: 45px; border-radius: 10px;color: #008080;">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

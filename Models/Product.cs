@@ -6,6 +6,9 @@ namespace Inventory_Management_System__Miracle_Shop_.Models
 {
     public class Product
     {
+
+        public string BarcodePath { get; set; }
+
         // Unique identifier for the product
         public int ProductID { get; set; }
 

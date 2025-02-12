@@ -4,14 +4,16 @@ using Inventory_Management_System__Miracle_Shop_.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Inventory_Management_System__Miracle_Shop_.Migrations
 {
     [DbContext(typeof(MiracleDbContext))]
-    partial class MiracleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250212191004_purchase")]
+    partial class purchase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -179,6 +181,27 @@ namespace Inventory_Management_System__Miracle_Shop_.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("Inventory_Management_System__Miracle_Shop_.Models.Sale", b =>
+                {
+                    b.Property<int>("SaleID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("SaleID");
+
+                    b.ToTable("Sales");
                 });
 
             modelBuilder.Entity("Inventory_Management_System__Miracle_Shop_.Models.StockMovement", b =>
